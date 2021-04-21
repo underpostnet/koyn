@@ -1,6 +1,7 @@
 #lang scheme
 
 (require "../../../lib/colorize.scm")
+(require "../../../lib/str.scm")
 (require sha)
 (require json)
 
