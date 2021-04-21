@@ -90,7 +90,6 @@
       ;--------------------------------------
       (define/public (mineBlock difficulty)
           (pm_s (string-append "mineBlock -> difficulty:" difficulty))
-          (define cont 0)
           (while (not (startsWith hash difficulty))
             (+set! nonce 1)
             (set! hash (send this calculateHash))
