@@ -1,11 +1,13 @@
 #lang scheme
 
+(require "../../../lib/util.scm")
 (require "../../../lib/colorize.scm")
 (require "../../../lib/str.scm")
+(require dyoo-while-loop)
 (require sha)
 (require json)
 
-(py_s "\n\nkoyn v1.0")
+(py_s "\n\nkoyn v1.0\n")
 
 ;-------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------
@@ -28,7 +30,7 @@
       (super-new)
       ;--------------------------------------
       (define/public (calculateHash)
-         (pg_s "\ncalculateHash ->")
+         (pm_s "calculateHash ->")
 
          (display "index -> ")
          (display index)
@@ -62,32 +64,47 @@
          (display concat_data)
          (display "\n")
 
-         ;(#[string]) -> string to bytes
-         (define hash_test (bytes->hex-string (sha256-bytes
-           #"test"
-         )))
-         (display "hash_test -> ")
-         (display hash_test)
-         (display "\n")
+         ;  (#[string]) -> string to bytes
+         ;  (define hash_test (bytes->hex-string (sha256-bytes
+           ;  #"test"
+         ;  )))
+         ;  (display "hash_test -> ")
+         ;  (display hash_test)
+         ;  (display "\n")
 
-         (define return_hash (bytes->hex-string (sha256-bytes
+         (define hash_return (bytes->hex-string (sha256-bytes
            (string->bytes/utf-8 concat_data)
          )))
-         (display "return_hash -> ")
-         (display return_hash)
+         (display "hash_return -> ")
+         (display hash_return)
          (display "\n")
 
-         return_hash
+         hash_return
 
       )
       ;--------------------------------------
-      (define/public (get-hash) hash)
+      (define/public (get-hash)
+          (pm_s "get-hash ->")
+          hash
+      )
+      ;--------------------------------------
+      (define/public (mineBlock difficulty)
+          (pm_s (string-append "mineBlock -> difficulty:" difficulty))
+          (define cont 0)
+          (while (not (startsWith hash difficulty))
+            (+set! nonce 1)
+            (set! hash (send this calculateHash))
+            void
+          )
+          (py_s "Mined Block Success")
+          (pr_s (string-append "nonce:" (number->string nonce)))
+          (pr_s (string-append "hash:" hash))
+          void
+      )
       ;--------------------------------------
 
    )
 )
-
-
 
 ;-------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------
@@ -97,15 +114,17 @@
 (define block_a (new block%
   (data data_block_a)
 ))
-
-;-------------------------------------------------------------------------------
-;-------------------------------------------------------------------------------
-
-(pg_s "end ->")
+(pg_s "\nend ->")
 (display block_a)
-(display "\n")
-(display (send block_a get-hash))
 (display "\n\n")
+
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+
+(send block_a get-hash)
+(display "\n")
+(send block_a mineBlock "000")
+(display "\n")
 
 
 
