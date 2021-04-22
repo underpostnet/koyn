@@ -12,7 +12,7 @@
 ;-------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------
 
-(define block%
+(define Block%
    (class object%
       ;--------------------------------------> CONSTRUCTOR
       ; data -> json hash
@@ -108,38 +108,85 @@
 ;-------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------
 
-(define data_block_a (make-hash))
-(hash-set! data_block_a 'content "test")
-(define block_a (new block%
-  (data data_block_a)
+;  (define data_block_a (make-hash))
+;  (hash-set! data_block_a 'content "test")
+;  (define block_a (new Block%
+;    (data data_block_a)
+;  ))
+;  (pg_s "\nend ->")
+;  (display block_a)
+;  (display "\n\n")
+
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+
+;  (send block_a get-hash)
+;  (display "\n")
+;  (send block_a mineBlock "000")
+;  (display "\n")
+
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+
+(define generateData (lambda ()
+    (define data_return (make-hash))
+    (hash-set! data_return 'content "test")
+    data_return
+  )
+)
+
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+
+(define BlockChain%
+   (class object%
+      ;--------------------------------------> CONSTRUCTOR
+      (init-field
+         difficulty
+         name
+      )
+      (field
+        (chain (list (send this createGenesis)))
+      )
+      (super-new)
+      ;--------------------------------------
+      (define/public (createGenesis)
+        (define block_return (new Block%
+          (data (generateData))
+        ))
+        block_return
+      )
+      ;--------------------------------------
+      (define/public (get-latestBlock)
+        (list-ref chain (- (l chain) 1))
+      )
+      ;--------------------------------------
+      (define/public (get-chain) chain)
+      ;--------------------------------------
+      (define/public (get-name) name)
+      ;--------------------------------------
+      (define/public (get-difficulty) difficulty)
+      ;--------------------------------------
+
+   )
+)
+
+
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+
+
+
+(define koyn (new BlockChain%
+  (name "Koyn")
+  (difficulty "0000")
 ))
-(pg_s "\nend ->")
-(display block_a)
-(display "\n\n")
 
-;-------------------------------------------------------------------------------
-;-------------------------------------------------------------------------------
-
-(send block_a get-hash)
-(display "\n")
-(send block_a mineBlock "000")
-(display "\n")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+(py_s "\nKoyn BlockChain Data ->")
+(send koyn get-chain)
+; (send koyn get-name)
+; (send koyn get-difficulty)
+; (send koyn get-latestBlock)
 
 
 
