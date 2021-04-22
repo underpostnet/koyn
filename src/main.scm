@@ -1,5 +1,8 @@
 #lang scheme
 
+; Developed By Francisco Verdugo <fcoverdugoa@underpost.net>
+; https://github.com/underpostnet/koyn
+
 (require "../../../lib/util.scm")
 (require "../../../lib/colorize.scm")
 (require "../../../lib/str.scm")
