@@ -95,12 +95,7 @@
             (set! hash (send this calculateHash))
             void
           )
-          (py_s "Mined Block Success")
-          (pr_s (string-append "nonce:" (number->string nonce)))
-          (pr_s (string-append "hash:" hash))
-          (pr_s (string-append "previousHash:" previousHash))
-          (pr_s (string-append "index:" (number->string index)))
-          (pr_s (string-append "data:" (jsexpr->string data)))
+          (printInfo "Mined Block Success" nonce previousHash hash index data date)
           void
       )
       ;--------------------------------------> PREVIOUS HASH
@@ -115,6 +110,12 @@
           void
       )
       (define/public (get-index) index)
+      ;--------------------------------------
+      (define/public (get-nonce) nonce)
+      ;--------------------------------------
+      (define/public (get-data) data)
+      ;--------------------------------------
+      (define/public (get-date) date)
       ;--------------------------------------
 
    )
@@ -150,6 +151,17 @@
   )
 )
 
+(define printInfo (lambda (msg nonce previousHash hash index data date)
+    (py_s msg)
+    (pr_s (string-append "nonce:" (number->string nonce)))
+    (pr_s (string-append "previousHash:" previousHash))
+    (pr_s (string-append "hash:" hash))
+    (pr_s (string-append "index:" (number->string index)))
+    (pr_s (string-append "data:" (jsexpr->string data)))
+    (pr_s (string-append "date:" (number->string date)))
+  )
+)
+
 ;-------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------
 
@@ -169,6 +181,14 @@
         (define block_return (new Block%
           (data (generateData))
         ))
+        (printInfo "Generate Genesis Block"
+          (send block_return get-nonce)
+          (send block_return get-previousHash)
+          (send block_return get-hash)
+          (send block_return get-index)
+          (send block_return get-data)
+          (send block_return get-date)
+        )
         block_return
       )
       ;--------------------------------------
@@ -213,7 +233,7 @@
 
 (define koyn (new BlockChain%
   (name "Koyn")
-  (difficulty "00")
+  (difficulty "00000")
 ))
 
 (send koyn addBlock (new Block% (data (generateData))))
