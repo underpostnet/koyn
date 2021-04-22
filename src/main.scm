@@ -30,27 +30,27 @@
       (super-new)
       ;--------------------------------------
       (define/public (calculateHash)
-         (pm_s "calculateHash ->")
+         ; (pm_s "calculateHash ->")
 
-         (display "index -> ")
-         (display index)
-         (display "\n")
+         ; (display "index -> ")
+         ; (display index)
+         ; (display "\n")
 
-         (display "previousHash -> ")
-         (display previousHash)
-         (display "\n")
+         ; (display "previousHash -> ")
+         ; (display previousHash)
+         ; (display "\n")
 
-         (display "date -> ")
-         (display date)
-         (display "\n")
+         ; (display "date -> ")
+         ; (display date)
+         ; (display "\n")
 
-         (display "data -> ")
-         (display data)
-         (display "\n")
+         ; (display "data -> ")
+         ; (display data)
+         ; (display "\n")
 
-         (display "nonce -> ")
-         (display nonce)
-         (display "\n")
+         ; (display "nonce -> ")
+         ; (display nonce)
+         ; (display "\n")
 
          (define concat_data (string-append
              (number->string index)
@@ -60,9 +60,9 @@
              (number->string nonce)
          ))
 
-         (pg_s "concat ->")
-         (display concat_data)
-         (display "\n")
+         ; (pg_s "concat ->")
+         ; (display concat_data)
+         ; (display "\n")
 
          ;  (#[string]) -> string to bytes
          ;  (define hash_test (bytes->hex-string (sha256-bytes
@@ -75,16 +75,16 @@
          (define hash_return (bytes->hex-string (sha256-bytes
            (string->bytes/utf-8 concat_data)
          )))
-         (display "hash_return -> ")
-         (display hash_return)
-         (display "\n")
+         ; (display "hash_return -> ")
+         ; (display hash_return)
+         ; (display "\n")
 
          hash_return
 
       )
       ;--------------------------------------
       (define/public (get-hash)
-          (pm_s "get-hash ->")
+          ; (pm_s "get-hash ->")
           hash
       )
       ;--------------------------------------
@@ -98,8 +98,23 @@
           (py_s "Mined Block Success")
           (pr_s (string-append "nonce:" (number->string nonce)))
           (pr_s (string-append "hash:" hash))
+          (pr_s (string-append "previousHash:" previousHash))
+          (pr_s (string-append "index:" (number->string index)))
+          (pr_s (string-append "data:" (jsexpr->string data)))
           void
       )
+      ;--------------------------------------> PREVIOUS HASH
+      (define/public (set-previousHash new_previousHash)
+          (set! previousHash new_previousHash)
+          void
+      )
+      (define/public (get-previousHash) previousHash)
+      ;--------------------------------------> INDEX
+      (define/public (set-index new_index)
+          (set! index new_index)
+          void
+      )
+      (define/public (get-index) index)
       ;--------------------------------------
 
    )
@@ -158,7 +173,26 @@
       )
       ;--------------------------------------
       (define/public (get-latestBlock)
-        (list-ref chain (- (l chain) 1))
+        (list-ref chain 0)
+      )
+      ;--------------------------------------
+      (define/public (addBlock block)
+
+        (define new_index
+          (+ (send (send this get-latestBlock) get-index) 1)
+        )
+        (send block set-index new_index)
+
+        (define new_previousHash
+          (send (send this get-latestBlock) get-hash)
+        )
+        (send block set-previousHash new_previousHash)
+
+        (send block mineBlock difficulty)
+
+        (push block chain)
+
+        void
       )
       ;--------------------------------------
       (define/public (get-chain) chain)
@@ -179,14 +213,38 @@
 
 (define koyn (new BlockChain%
   (name "Koyn")
-  (difficulty "0000")
+  (difficulty "00")
 ))
+
+(send koyn addBlock (new Block% (data (generateData))))
+(send koyn addBlock (new Block% (data (generateData))))
 
 (py_s "\nKoyn BlockChain Data ->")
 (send koyn get-chain)
+
 ; (send koyn get-name)
 ; (send koyn get-difficulty)
 ; (send koyn get-latestBlock)
+
+
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
