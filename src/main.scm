@@ -10,8 +10,6 @@
 (require sha)
 (require json)
 
-(py_s "\n\nkoyn v1.0\n")
-
 ;-------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------
 
@@ -224,31 +222,54 @@
       ;--------------------------------------
       (define/public (get-difficulty) difficulty)
       ;--------------------------------------
+      (define/public (checkValid)
+        (define valid #t)
+        (for ((i (in-range 1 (l chain))))
+
+          (define currentBlock (list-ref (reverse chain) i))
+          (define previousBlock (list-ref (reverse chain) (- i 1)))
+
+          (pg_s "data block checkValid ->")
+          (pr_s (send currentBlock get-previousHash))
+          (pr_s (send previousBlock get-hash))
+
+          (if (not (equal? (send currentBlock get-hash) (send currentBlock calculateHash)))
+           (set! valid #f) void)
+
+          (if (not (equal? (send currentBlock get-previousHash) (send previousBlock get-hash)))
+           (set! valid #f) void)
+
+        )
+        valid
+      )
 
    )
 )
 
 
+
 ;-------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------
 
-
+(py_s "\nkoyn v1.0\n")
 
 (define koyn (new BlockChain%
   (name "Koyn")
-  (difficulty "00000")
+  (difficulty "0000")
 ))
 
+(display "\n")
+
+(send koyn addBlock (new Block% (data (generateData))))
+(send koyn addBlock (new Block% (data (generateData))))
 (send koyn addBlock (new Block% (data (generateData))))
 (send koyn addBlock (new Block% (data (generateData))))
 
 (py_s "\nKoyn BlockChain Data ->")
 (send koyn get-chain)
 
-; (send koyn get-name)
-; (send koyn get-difficulty)
-; (send koyn get-latestBlock)
-
+(py_s "\nKoyn checkValid ->")
+(send koyn checkValid)
 
 ;-------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------
