@@ -89,14 +89,15 @@
           hash
       )
       ;--------------------------------------
-      (define/public (mineBlock difficulty)
+      (define/public (mineBlock difficulty mineLog)
           (pm_s (string-append "mineBlock -> difficulty:" difficulty))
           (while (not (startsWith hash difficulty))
             (+set! nonce 1)
             (set! hash (send this calculateHash))
+            (if mineLog (pm_s hash) void)
             void
           )
-          (printInfo "Mined Block Success" nonce previousHash hash index data date)
+          (printInfo "Mined Block Success" this)
           void
       )
       ;--------------------------------------> PREVIOUS HASH
@@ -152,14 +153,14 @@
   )
 )
 
-(define printInfo (lambda (msg nonce previousHash hash index data date)
+(define printInfo (lambda (msg block)
     (py_s msg)
-    (pr_s (string-append "nonce:" (number->string nonce)))
-    (pr_s (string-append "previousHash:" previousHash))
-    (pr_s (string-append "hash:" hash))
-    (pr_s (string-append "index:" (number->string index)))
-    (pr_s (string-append "data:" (jsexpr->string data)))
-    (pr_s (string-append "date:" (number->string date)))
+    (pr_s (string-append "nonce:" (number->string (send block get-nonce))))
+    (pr_s (string-append "previousHash:" (send block get-previousHash)))
+    (pr_s (string-append "hash:" (send block get-hash)))
+    (pr_s (string-append "index:" (number->string (send block get-index))))
+    (pr_s (string-append "data:" (jsexpr->string (send block get-data))))
+    (pr_s (string-append "date:" (number->string (send block get-date))))
   )
 )
 
@@ -172,6 +173,7 @@
       (init-field
          difficulty
          name
+         mineLog
       )
       (field
         (chain (list (send this createGenesis)))
@@ -182,14 +184,7 @@
         (define block_return (new Block%
           (data (generateData))
         ))
-        (printInfo "Generate Genesis Block"
-          (send block_return get-nonce)
-          (send block_return get-previousHash)
-          (send block_return get-hash)
-          (send block_return get-index)
-          (send block_return get-data)
-          (send block_return get-date)
-        )
+        (printInfo "Generate Genesis Block" block_return)
         block_return
       )
       ;--------------------------------------
@@ -209,7 +204,7 @@
         )
         (send block set-previousHash new_previousHash)
 
-        (send block mineBlock difficulty)
+        (send block mineBlock difficulty mineLog)
 
         (push block chain)
 
@@ -229,9 +224,9 @@
           (define currentBlock (list-ref (reverse chain) i))
           (define previousBlock (list-ref (reverse chain) (- i 1)))
 
-          (pg_s "data block checkValid ->")
-          (pr_s (send currentBlock get-previousHash))
-          (pr_s (send previousBlock get-hash))
+          (printInfo "data block checkValid ->" currentBlock)
+          (pg_s (send currentBlock get-previousHash))
+          (pg_s (send previousBlock get-hash))
 
           (if (not (equal? (send currentBlock get-hash) (send currentBlock calculateHash)))
            (set! valid #f) void)
@@ -255,20 +250,14 @@
 
 (define koyn (new BlockChain%
   (name "Koyn")
-  (difficulty "0000")
+  (difficulty "0")
+  (mineLog #t)
 ))
 
-(display "\n")
-
 (send koyn addBlock (new Block% (data (generateData))))
 (send koyn addBlock (new Block% (data (generateData))))
 (send koyn addBlock (new Block% (data (generateData))))
 (send koyn addBlock (new Block% (data (generateData))))
-
-(py_s "\nKoyn BlockChain Data ->")
-(send koyn get-chain)
-
-(py_s "\nKoyn checkValid ->")
 (send koyn checkValid)
 
 ;-------------------------------------------------------------------------------
