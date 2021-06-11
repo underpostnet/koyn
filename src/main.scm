@@ -18,6 +18,8 @@
       ;--------------------------------------> CONSTRUCTOR
       ; data -> json hash
       (init-field data)
+      (init-field reward)
+      (init-field rewardAddress)  ; public key to sha256 hash
       (field
 
         (index 0)
@@ -59,6 +61,8 @@
              (number->string date)
              (jsexpr->string data)
              (number->string nonce)
+             rewardAddress
+             (number->string reward)
          ))
 
          ; (pg_s "concat ->")
@@ -119,6 +123,10 @@
       ;--------------------------------------
       (define/public (get-date) date)
       ;--------------------------------------
+      (define/public (get-reward) reward)
+      ;--------------------------------------
+      (define/public (get-rewardAddress) rewardAddress)
+      ;--------------------------------------
 
    )
 )
@@ -161,6 +169,8 @@
     (pr_s (string-append "index:" (number->string (send block get-index))))
     (pr_s (string-append "data:" (jsexpr->string (send block get-data))))
     (pr_s (string-append "date:" (number->string (send block get-date))))
+    (pr_s (string-append "reward:" (number->string (send block get-reward))))
+    (pr_s (string-append "rewardAddress:" (send block get-rewardAddress)))
   )
 )
 
@@ -183,6 +193,8 @@
       (define/public (createGenesis)
         (define block_return (new Block%
           (data (generateData))
+          (reward 0)
+          (rewardAddress "")
         ))
         (printInfo "Generate Genesis Block" block_return)
         block_return
@@ -250,14 +262,17 @@
 
 (define koyn (new BlockChain%
   (name "Koyn")
-  (difficulty "0")
+  (difficulty "000")
   (mineLog #t)
 ))
 
-(send koyn addBlock (new Block% (data (generateData))))
-(send koyn addBlock (new Block% (data (generateData))))
-(send koyn addBlock (new Block% (data (generateData))))
-(send koyn addBlock (new Block% (data (generateData))))
+(define minerAddress "9by4Bvfhlchr9z0N")
+(define koynReward 10)
+
+(send koyn addBlock (new Block% (data (generateData))(reward koynReward)(rewardAddress minerAddress) ))
+(send koyn addBlock (new Block% (data (generateData))(reward koynReward)(rewardAddress minerAddress) ))
+(send koyn addBlock (new Block% (data (generateData))(reward koynReward)(rewardAddress minerAddress) ))
+(send koyn addBlock (new Block% (data (generateData))(reward koynReward)(rewardAddress minerAddress) ))
 (send koyn checkValid)
 
 ;-------------------------------------------------------------------------------
